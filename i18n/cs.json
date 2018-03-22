@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Josef Martiňák"
+		]
+	},
+	"decorations": "Vyznamenání",
+	"decorations-desc": "Seznam vyznamenaných uživatelů.",
+	"decorations-home": "Podrobnosti o vyznamenáních: ",
+	"decorations-username": "Jméno uživatele",
+	"decorations-count": "Počet vyznamenání",
+	"decorations-load": "Načíst vyznamenání",
+	"decorations-notselected": "Zvolte vyznamenání"
+}

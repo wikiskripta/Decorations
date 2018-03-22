@@ -1,0 +1,20 @@
+{
+	"name": "Decorations",
+	"version": "1.0",
+	"author": "Josef Martiňák",
+	"descriptionmsg": "decorations-desc",
+	"type": "specialpage",
+	"SpecialPages": {
+		"Decorations": "Decorations"
+	},
+	"MessagesDirs": {
+		"Decorations": [
+			"i18n"
+		]
+	},
+	"AutoloadClasses": {
+		"DecorationsHooks": "DecorationsHooks.php",
+		"Decorations": "Decorations_body.php"
+	},
+	"manifest_version": 1
+}

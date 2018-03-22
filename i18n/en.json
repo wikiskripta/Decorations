@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Josef Martiňák"
+		]
+	},
+	"decorations": "Decorations",
+	"decorations-desc": "List of decorated users.",
+	"decorations-home": "Decorations' details: ",
+	"decorations-username": "User name",
+	"decorations-count": "Decorations' count",
+	"decorations-load": "Load decorations",
+	"decorations-notselected": "Select decoration"
+}
