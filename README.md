@@ -18,7 +18,6 @@ _SpecialPage:Decorations_ searches through the discussion pages/user pages/threa
 * Make sure you have MediaWiki 1.28+ installed.
 * Download and place the extension's folder to your /extensions/ folder.
 * Add the following code to your LocalSettings.php: 
-* Set CRON job for _CRON/update_decorations.php_.
 ```
 wfLoadExtension( 'Decorations' );
 ```
