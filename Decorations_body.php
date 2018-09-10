@@ -17,15 +17,19 @@ class Decorations extends SpecialPage {
 
 	function execute($param) {
 
-		require("config.php");
+		$config = $this->getConfig();
+		$decorationsHome = $config->get( 'decorationsHome' );
+		$decorationsList = $config->get( 'decorationsList' );
+		$wikipath = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
+		
 		$this->setHeaders();
 		$out = $this->getOutput();
 		// display header				
-		$out->addWikiText($this->msg( 'decorations-desc' )->plain() . '<br>' . $this->msg( 'decorations-home' )->plain() . "[[" . $wgDecorationsHome . "]]\n");
+		$out->addWikiText($this->msg( 'decorations-desc' )->plain() . '<br>' . $this->msg( 'decorations-home' )->plain() . "[[" . $decorationsHome . "]]\n");
 
 		// defaults
 		$plist = array();
-		for($i=0;$i<sizeof($wgDecorations);$i++) array_push($plist,$i);
+		for($i=0;$i<sizeof($decorationsList);$i++) array_push($plist,$i);
 		if ( empty( $param ) || !preg_match( "/^(" . implode('|',$plist) . ")$/", $param ) ) {
 			$param = 0;
 		}
@@ -37,17 +41,17 @@ class Decorations extends SpecialPage {
 		$output .= "<select id='decMenu' onchange='location.href=\"$url/\" +";
 		$output .= "this.options[this.selectedIndex].value'>\n";
 
-		for($i=0;$i<sizeof($wgDecorations);$i++) {
+		for($i=0;$i<sizeof($decorationsList);$i++) {
 			$output .= "<option value='$i' ";
 			if($i == $param) $output .= "selected='selected'";
-			$output .= ">" . $wgDecorations[$i][1] . "</option>\n";
+			$output .= ">" . $decorationsList[$i][1] . "</option>\n";
 		}
 		$output .= "</select>\n";
 		$output .= "</form>\n";
 		$out->addHTML($output . '<br>');
 
 		// Get decoration counts
-		$json = json_decode( file_get_contents($wikipath . "/api.php?action=query&format=json&list=imageusage&iulimit=500&iutitle=File:" . $wgDecorations[$param][0]), true );
+		$json = json_decode( file_get_contents($wikipath . "/api.php?action=query&format=json&list=imageusage&iulimit=500&iutitle=File:" . $decorationsList[$param][0]), true );
 		$json = $json['query']['imageusage'];
 
 		$results = array();
@@ -70,7 +74,7 @@ class Decorations extends SpecialPage {
 			$output .= '|[[User:' . $key . '|' . $key . ']] || ' . $value . "\n";
 		}
 		$output .= "|}\n";
-		$out->addWikiText("==" . $wgDecorations[$param][1] . "==\n");
+		$out->addWikiText("==" . $decorationsList[$param][1] . "==\n");
 		$out->addWikiText($output);
 
 	}		

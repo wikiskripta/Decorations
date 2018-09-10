@@ -1,9 +1,15 @@
 {
 	"name": "Decorations",
-	"version": "1.0",
+	"version": "1.1",
 	"author": "Josef Martiňák",
+	"url": "https://bitbucket.org/wikiskripta/decorations",
 	"descriptionmsg": "decorations-desc",
 	"type": "specialpage",
+	"license-name": "MIT",
+	"status": "stable",
+	"requires": {
+		"MediaWiki": ">= 1.29.0"
+	},
 	"SpecialPages": {
 		"Decorations": "Decorations"
 	},
@@ -13,8 +19,22 @@
 		]
 	},
 	"AutoloadClasses": {
-		"DecorationsHooks": "DecorationsHooks.php",
 		"Decorations": "Decorations_body.php"
 	},
-	"manifest_version": 1
+	"config": {
+		"decorationsHome": {
+			"value": "WikiSkripta:Vyznamenání",
+			"description": "Wiki pagename informing about available wiki decorations"
+		},
+		"decorationsList": {
+			"value": [
+				["Wiki4lístek.png", "WikiČtyřlístek", "Vyznamenání udílené obvykle za zvláštní či dlouhodobý přínos WikiSkriptům."],
+				["WikiSlunicko.png", "WikiSluníčko", "Spíše než o vyznamenání se jedná o pozdrav a vyjádření podpory v další činnosti. V praxi lze udělit uživateli prostě proto, že jste si na něj vzpoměli, a chcete mu třeba popřát hezký den."],
+				["Kava.png", "Řád černé kávy", "Jedná se o ocenění noční práce redaktora/uživatele. Prostě, když uvidíte někoho editovat ve 2 hodiny ráno, proč ho neocenit za toto nasazení?"],
+				["Řád_bílého_jednorožce2.png", "Řád bílého jednorožce", "Jedná se o ocenění výjimečného přínosu redaktora/uživatele. Když v úžasu stanete nad prací kolegy/ně, neváhejte jim udělením tohoto ocenění sdělit, že vás to ohromilo."]
+			],
+			"description": "Decorations info (decoration's image placed on wiki, title, description)"
+		}
+	},
+	"manifest_version": 2
 }
