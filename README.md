@@ -2,32 +2,30 @@
 
 Mediawiki extension.
 
-
 ## Description
 
 * Let's say we encourage users in their work by putting an particular image (with thanks) into their discussion page. 
 * This extension shows the lists of honored users at special page.
 
-
 ## SpecialPage
 
 _SpecialPage:Decorations_ searches through the discussion pages/user pages/threads of all users for decorations' images and shows the lists of honored ones.
-
 
 ## Installation
 
 * Make sure you have MediaWiki 1.29+ installed.
 * Download and place the extension to your /extensions/ folder.
 * Add the following code to your LocalSettings.php: 
-```
+
+```php
 wfLoadExtension( 'Decorations' );
 ```
-
 
 ## Configuration
 
 Edit config section of _extension.json_.
-```
+
+```php
 // Wiki pagename informing about available wiki decorations
 "decorationsHome": "WikiSkripta:Vyznamenání"
 // Decorations info (decoration's image placed on wiki, title, description)
@@ -40,11 +38,9 @@ Edit config section of _extension.json_.
 	]
 ```
 
-
 ## Internationalization
 
 This extension is available in English and Czech language. For other languages, just edit files in /i18n/ folder.
-
 
 ## RELEASE NOTES
 
@@ -54,8 +50,7 @@ This extension is available in English and Czech language. For other languages, 
 * MW 1.29+
 * config moved to _extensions.json_
 
-
 ## Authors and license
 
 * [Josef Martiňák](https://www.wikiskripta.eu/w/User:Josmart)
-* MIT License, Copyright (c) 2018 First Faculty of Medicine, Charles University
+* MIT License, Copyright (c) 2019 First Faculty of Medicine, Charles University

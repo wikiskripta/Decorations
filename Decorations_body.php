@@ -36,7 +36,7 @@ class Decorations extends SpecialPage {
 		$param = (int)$param;
 
 		// Dropdown list for selecting particular list
-		$output .= "<form id='decMenuForm' name='decMenuForm' method='get' action=''>\n";
+		$output = "<form id='decMenuForm' name='decMenuForm' method='get' action=''>\n";
 		$url = $wikipath . "/index.php?title=Special:Decorations";
 		$output .= "<select id='decMenu' onchange='location.href=\"$url/\" +";
 		$output .= "this.options[this.selectedIndex].value'>\n";
