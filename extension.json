@@ -1,6 +1,6 @@
 {
 	"name": "Decorations",
-	"version": "1.1",
+	"version": "1.1.1",
 	"author": "[https://www.wikiskripta.eu/w/User:Josmart Josef Martiňák]",
 	"url": "https://bitbucket.org/wikiskripta/decorations",
 	"descriptionmsg": "decorations-desc",
@@ -8,7 +8,7 @@
 	"license-name": "MIT",
 	"status": "stable",
 	"requires": {
-		"MediaWiki": ">= 1.29.0"
+		"MediaWiki": ">= 1.36.0"
 	},
 	"SpecialPages": {
 		"Decorations": "Decorations"

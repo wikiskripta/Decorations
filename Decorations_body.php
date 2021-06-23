@@ -4,28 +4,24 @@
  * SpecialPage for Decorations extension
  * @ingroup Extensions
  * @author Josef Martiňák
- * @license MIT
- * @file
  */
-
 
 class Decorations extends SpecialPage {
 	function __construct() {
 		parent::__construct( 'Decorations' );
 	}
 
-
 	function execute($param) {
 
+		global $wgServer;
 		$config = $this->getConfig();
 		$decorationsHome = $config->get( 'decorationsHome' );
 		$decorationsList = $config->get( 'decorationsList' );
-		$wikipath = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
-		
+
 		$this->setHeaders();
 		$out = $this->getOutput();
 		// display header				
-		$out->addWikiText($this->msg( 'decorations-desc' )->plain() . '<br>' . $this->msg( 'decorations-home' )->plain() . "[[" . $decorationsHome . "]]\n");
+		$out->addWikiTextAsInterface($this->msg( 'decorations-desc' )->plain() . '<br>' . $this->msg( 'decorations-home' )->plain() . "[[" . $decorationsHome . "]]\n");
 
 		// defaults
 		$plist = array();
@@ -37,7 +33,7 @@ class Decorations extends SpecialPage {
 
 		// Dropdown list for selecting particular list
 		$output = "<form id='decMenuForm' name='decMenuForm' method='get' action=''>\n";
-		$url = $wikipath . "/index.php?title=Special:Decorations";
+		$url = $wgServer . "/index.php?title=Special:Decorations";
 		$output .= "<select id='decMenu' onchange='location.href=\"$url/\" +";
 		$output .= "this.options[this.selectedIndex].value'>\n";
 
@@ -51,7 +47,7 @@ class Decorations extends SpecialPage {
 		$out->addHTML($output . '<br>');
 
 		// Get decoration counts
-		$json = json_decode( file_get_contents($wikipath . "/api.php?action=query&format=json&list=imageusage&iulimit=500&iutitle=File:" . $decorationsList[$param][0]), true );
+		$json = json_decode( file_get_contents($wgServer . "/api.php?action=query&format=json&list=imageusage&iulimit=500&iutitle=File:" . $decorationsList[$param][0]), true );
 		$json = $json['query']['imageusage'];
 
 		$results = array();
@@ -74,8 +70,7 @@ class Decorations extends SpecialPage {
 			$output .= '|[[User:' . $key . '|' . $key . ']] || ' . $value . "\n";
 		}
 		$output .= "|}\n";
-		$out->addWikiText("==" . $decorationsList[$param][1] . "==\n");
-		$out->addWikiText($output);
-
+		$out->addWikiTextAsInterface("==" . $decorationsList[$param][1] . "==\n");
+		$out->addWikiTextAsInterface($output);
 	}		
 }

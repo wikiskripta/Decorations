@@ -6,6 +6,7 @@ Mediawiki extension.
 
 * Let's say we encourage users in their work by putting an particular image (with thanks) into their discussion page. 
 * This extension shows the lists of honored users at special page.
+* Version 1.1.1
 
 ## SpecialPage
 
@@ -13,7 +14,7 @@ _SpecialPage:Decorations_ searches through the discussion pages/user pages/threa
 
 ## Installation
 
-* Make sure you have MediaWiki 1.29+ installed.
+* Make sure you have MediaWiki 1.36+ installed.
 * Download and place the extension to your /extensions/ folder.
 * Add the following code to your LocalSettings.php: 
 
@@ -42,7 +43,7 @@ Edit config section of _extension.json_.
 
 This extension is available in English and Czech language. For other languages, just edit files in /i18n/ folder.
 
-## RELEASE NOTES
+## Release Notes
 
 ### 1.1
 
@@ -50,7 +51,11 @@ This extension is available in English and Czech language. For other languages, 
 * MW 1.29+
 * config moved to _extensions.json_
 
+### 1.1.1
+
+* Fix: $out->addWikiText deprecated, use $out->addWikiTextAsInterface instead
+
 ## Authors and license
 
 * [Josef Martiňák](https://www.wikiskripta.eu/w/User:Josmart)
-* MIT License, Copyright (c) 2019 First Faculty of Medicine, Charles University
+* MIT License, Copyright (c) 2021 First Faculty of Medicine, Charles University
