@@ -6,7 +6,7 @@ Mediawiki extension.
 
 * Let's say we encourage users in their work by putting an particular image (with thanks) into their discussion page. 
 * This extension shows the lists of honored users at special page.
-* Version 1.1.1
+* Version 1.1.2
 
 ## SpecialPage
 
@@ -48,14 +48,18 @@ This extension is available in English and Czech language. For other languages, 
 ### 1.1
 
 * manifest version 2
-* MW 1.29+
+* MW 1.45+
 * config moved to _extensions.json_
 
 ### 1.1.1
 
 * Fix: $out->addWikiText deprecated, use $out->addWikiTextAsInterface instead
 
+### 1.1.2
+
+* Rewrite for MW 1.45
+
 ## Authors and license
 
 * [Josef Martiňák](https://www.wikiskripta.eu/w/User:Josmart)
-* MIT License, Copyright (c) 2023 First Faculty of Medicine, Charles University
+* MIT License, Copyright (c) 2026 First Faculty of Medicine, Charles University
