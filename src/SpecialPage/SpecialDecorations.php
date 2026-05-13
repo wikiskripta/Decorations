@@ -22,12 +22,14 @@ class SpecialDecorations extends SpecialPage {
 		$decorationsList = (array)$config->get( 'decorationsList' );
 
 		$out->addHTML( Html::rawElement(
-			'p', [],
+			'p',
+			[],
 			$this->msg( 'decorations-desc' )->escaped()
 		) );
 
 		$out->addHTML( Html::rawElement(
-			'p', [],
+			'p',
+			[],
 			$this->msg( 'decorations-home' )->escaped() . ' ' .
 			$this->getLinkRenderer()->makeKnownLink(
 				MediaWikiServices::getInstance()->getTitleFactory()->newFromText( $decorationsHome ),
@@ -36,7 +38,9 @@ class SpecialDecorations extends SpecialPage {
 		) );
 
 		if ( $decorationsList === [] ) {
-			$out->addHTML( Html::rawElement( 'div', [ 'class' => 'errorbox' ],
+			$out->addHTML( Html::rawElement(
+				'div',
+				[ 'class' => 'errorbox' ],
 				htmlspecialchars( 'Decorations list is empty (check configuration).', ENT_QUOTES )
 			) );
 			$out->addHTML( Html::element( 'div', [ 'class' => 'visualClear' ] ) );
@@ -47,29 +51,87 @@ class SpecialDecorations extends SpecialPage {
 		$out->addHTML( $this->buildSelectForm( $idx, $decorationsList ) );
 		$out->addHTML( Html::element( 'hr' ) );
 
-		$imageName = (string)($decorationsList[$idx][0] ?? '');
-		$label = (string)($decorationsList[$idx][1] ?? '');
+		$imageName = trim( (string)( $decorationsList[$idx][0] ?? '' ) );
+		$label = (string)( $decorationsList[$idx][1] ?? '' );
 
-		if ( $imageName === '' ) {
-			$out->addHTML( Html::rawElement( 'div', [ 'class' => 'errorbox' ], 'Invalid configuration.' ) );
+		$imageTitle = $this->makeImageTitle( $imageName );
+		if ( $imageTitle === null ) {
+			$out->addHTML( Html::rawElement(
+				'div',
+				[ 'class' => 'errorbox' ],
+				Html::element( 'strong', [], 'Invalid image title.' ) . ' ' .
+				Html::element( 'span', [], 'Configured value: ' . $imageName )
+			) );
 			$out->addHTML( Html::element( 'div', [ 'class' => 'visualClear' ] ) );
 			return;
 		}
 
-		$usageTitles = $this->fetchImageUsageTitles( "File:$imageName" );
+		$usagePages = $this->fetchImageUsagePages( $imageTitle->getPrefixedText() );
 
 		$counts = [];
-		foreach ( $usageTitles as $pageTitle ) {
-			$user = $this->extractUsername( $pageTitle );
-			if ( $user === null ) {
+		foreach ( $usagePages as $page ) {
+			$titleText = (string)( $page['title'] ?? '' );
+			$content = (string)( $page['content'] ?? '' );
+
+			$user = $this->extractUsername( $titleText );
+			if ( $user === null || $content === '' ) {
 				continue;
 			}
-			$counts[$user] = ($counts[$user] ?? 0) + 1;
+
+			$count = $this->countImageOccurrences( $content, $imageTitle );
+			if ( $count <= 0 ) {
+				continue;
+			}
+
+			$counts[$user] = ( $counts[$user] ?? 0 ) + $count;
 		}
 		ksort( $counts, SORT_NATURAL | SORT_FLAG_CASE );
 
 		$out->addHTML( Html::element( 'h2', [], $label ) );
 		$out->addHTML( $this->buildResultsTable( $counts ) );
+	}
+
+
+	/**
+	 * Builds a valid file title from configuration. The value may be written either
+	 * as a bare file name (Wiki4lístek.png) or with a file namespace prefix
+	 * (File:Wiki4lístek.png / Soubor:Wiki4lístek.png).
+	 */
+	private function makeImageTitle( string $configuredName ) {
+		$configuredName = trim( $configuredName );
+		if ( $configuredName === '' ) {
+			return null;
+		}
+
+		$titleFactory = MediaWikiServices::getInstance()->getTitleFactory();
+
+		// First try the value exactly as configured, using NS_FILE as default only
+		// when the value has no namespace prefix. This avoids creating invalid
+		// titles such as File:Soubor:Example.png.
+		$title = $titleFactory->newFromText( $configuredName, NS_FILE );
+		if ( $title !== null && $title->getNamespace() === NS_FILE ) {
+			return $title;
+		}
+
+		// Fallback for installations where localized/canonical aliases were not
+		// recognized in this context: strip a known file namespace manually.
+		$prefixes = $this->getFileNamespacePrefixes();
+		foreach ( $prefixes as $prefix ) {
+			$prefix = trim( (string)$prefix );
+			if ( $prefix === '' ) {
+				continue;
+			}
+			$pattern = '/^' . preg_quote( $prefix, '/' ) . '\s*:\s*/iu';
+			if ( preg_match( $pattern, $configuredName ) ) {
+				$bareName = trim( preg_replace( $pattern, '', $configuredName, 1 ) );
+				$title = $titleFactory->newFromText( $bareName, NS_FILE );
+				if ( $title !== null && $title->getNamespace() === NS_FILE ) {
+					return $title;
+				}
+			}
+		}
+
+		return null;
 	}
 
 	private function normalizeIndex( $subPage, int $max ): int {
@@ -80,7 +142,7 @@ class SpecialDecorations extends SpecialPage {
 			return 0;
 		}
 		$i = (int)$subPage;
-		return ($i >= 0 && $i < $max) ? $i : 0;
+		return ( $i >= 0 && $i < $max ) ? $i : 0;
 	}
 
 	private function buildSelectForm( int $selected, array $decorationsList ): string {
@@ -88,12 +150,12 @@ class SpecialDecorations extends SpecialPage {
 
 		$optionsHtml = '';
 		foreach ( $decorationsList as $i => $row ) {
-			$label = (string)($row[1] ?? (string)$i);
+			$label = (string)( $row[1] ?? (string)$i );
 			$optionsHtml .= Html::element(
 				'option',
 				[
 					'value' => (string)$i,
-					'selected' => ($i === $selected) ? 'selected' : null
+					'selected' => ( $i === $selected ) ? 'selected' : null,
 				],
 				$label
 			);
@@ -103,7 +165,7 @@ class SpecialDecorations extends SpecialPage {
 			'select',
 			[
 				'id' => 'decMenu',
-				'onchange' => 'location.href=' . json_encode( $baseUrl . '/' ) . '+this.value;'
+				'onchange' => 'location.href=' . json_encode( $baseUrl . '/' ) . '+this.value;',
 			],
 			$optionsHtml
 		);
@@ -115,7 +177,13 @@ class SpecialDecorations extends SpecialPage {
 		);
 	}
 
-	private function fetchImageUsageTitles( string $fileTitleText ): array {
+	/**
+	 * Returns pages using the selected file together with their current wikitext.
+	 * The previous implementation used list=imageusage only, which can only tell
+	 * that a page uses the image. It cannot tell how many times the image appears
+	 * on that page.
+	 */
+	private function fetchImageUsagePages( string $fileTitleText ): array {
 		$services = MediaWikiServices::getInstance();
 		$http = $services->getHttpRequestFactory();
 
@@ -127,20 +195,20 @@ class SpecialDecorations extends SpecialPage {
 		$paramsBase = [
 			'action' => 'query',
 			'format' => 'json',
-			'list' => 'imageusage',
-			'iulimit' => '500',
-			'iutitle' => $fileTitleText,
+			'formatversion' => '2',
+			'generator' => 'imageusage',
+			'giulimit' => '500',
+			'giutitle' => $fileTitleText,
+			'prop' => 'revisions',
+			'rvprop' => 'content',
+			'rvslots' => 'main',
 		];
 
-		$titles = [];
-		$continue = null;
+		$pages = [];
+		$continueParams = [];
 
-		for ( $guard = 0; $guard < 50; $guard++ ) {
-			$params = $paramsBase;
-			if ( $continue !== null ) {
-				$params['iucontinue'] = $continue;
-			}
-
+		for ( $guard = 0; $guard < 100; $guard++ ) {
+			$params = $paramsBase + $continueParams;
 			$url = $apiUrl . '?' . wfArrayToCgi( $params );
 
 			$res = $http->get( $url, [
@@ -158,48 +226,119 @@ class SpecialDecorations extends SpecialPage {
 				break;
 			}
 
-			$list = $data['query']['imageusage'] ?? [];
-			if ( is_array( $list ) ) {
-				foreach ( $list as $row ) {
-					if ( isset( $row['title'] ) && is_string( $row['title'] ) ) {
-						$titles[] = $row['title'];
+			$queryPages = $data['query']['pages'] ?? [];
+			if ( is_array( $queryPages ) ) {
+				foreach ( $queryPages as $page ) {
+					if ( !is_array( $page ) || !isset( $page['title'] ) ) {
+						continue;
 					}
+
+					$content = '';
+					$revision = $page['revisions'][0] ?? null;
+					if ( is_array( $revision ) ) {
+						$content = (string)( $revision['slots']['main']['content'] ?? $revision['content'] ?? '' );
+					}
+
+					$pages[] = [
+						'title' => (string)$page['title'],
+						'content' => $content,
+					];
 				}
 			}
 
-			$continue = $data['continue']['iucontinue'] ?? null;
-			if ( !$continue ) {
+			$continue = $data['continue'] ?? null;
+			if ( !is_array( $continue ) ) {
 				break;
 			}
+
+			unset( $continue['continue'] );
+			if ( $continue === [] ) {
+				break;
+			}
+
+			$continueParams = $continue;
 		}
 
-		return $titles;
+		return $pages;
 	}
 
 	private function extractUsername( string $pageTitle ): ?string {
-		if ( preg_match(
-			'/^(Thread:)?(User:|User talk:|Uživatel:|Uživatelka:|Diskuse s uživatelem:|Diskuse s uživatelkou:)([^\/]*).*$/u',
-			$pageTitle,
-			$m
-		) ) {
-			$user = trim( $m[3] );
-			return $user !== '' ? $user : null;
+		$title = MediaWikiServices::getInstance()
+			->getTitleFactory()
+			->newFromText( $pageTitle );
+
+		if ( $title === null ) {
+			return null;
 		}
-		return null;
+
+		$namespace = $title->getNamespace();
+		if ( $namespace !== NS_USER && $namespace !== NS_USER_TALK ) {
+			return null;
+		}
+
+		$dbKey = $title->getDBkey();
+		$rootPart = explode( '/', $dbKey, 2 )[0];
+		$user = trim( str_replace( '_', ' ', $rootPart ) );
+
+		return $user !== '' ? $user : null;
+	}
+
+	private function countImageOccurrences( string $content, $imageTitle ): int {
+		$fileDbKey = $imageTitle->getDBkey();
+		$fileText = str_replace( '_', '[ _]', preg_quote( $fileDbKey, '~' ) );
+		$fileText = str_replace( '\ ', '[ _]', $fileText );
+
+		$namespaceAliases = $this->getFileNamespacePrefixes();
+		$count = 0;
+
+		foreach ( $namespaceAliases as $prefix ) {
+			$prefixPattern = preg_quote( $prefix, '~' );
+			$pattern = '~\[\[\s*' . $prefixPattern . '\s*:\s*' . $fileText . '(?=\s*(?:[\]|#]))~iu';
+			$count += preg_match_all( $pattern, $content );
+		}
+
+		return $count;
+	}
+
+	private function getFileNamespacePrefixes(): array {
+		$services = MediaWikiServices::getInstance();
+		$language = $services->getContentLanguage();
+
+		$prefixes = [ 'File', 'Image', 'Soubor', 'Obrázek' ];
+
+		$namespaceText = $language->getNsText( NS_FILE );
+		if ( $namespaceText !== '' ) {
+			$prefixes[] = $namespaceText;
+		}
+
+		$namespaceAliases = $services->getNamespaceInfo()->getCanonicalNamespaces();
+		if ( isset( $namespaceAliases[NS_FILE] ) && $namespaceAliases[NS_FILE] !== '' ) {
+			$prefixes[] = $namespaceAliases[NS_FILE];
+		}
+
+		return array_values( array_unique( array_filter( $prefixes, static function ( $prefix ) {
+			return is_string( $prefix ) && $prefix !== '';
+		} ) ) );
 	}
 
 	private function buildResultsTable( array $counts ): string {
-		$header = Html::rawElement( 'tr', [],
+		$header = Html::rawElement(
+			'tr',
+			[],
 			Html::element( 'th', [], $this->msg( 'decorations-username' )->text() ) .
 			Html::element( 'th', [], $this->msg( 'decorations-count' )->text() )
 		);
 
 		$rows = '';
 		foreach ( $counts as $username => $count ) {
-			$userTitle = MediaWikiServices::getInstance()->getTitleFactory()->newFromText( "User:$username" );
+			$userTitle = MediaWikiServices::getInstance()
+				->getTitleFactory()
+				->newFromText( 'User:' . $username );
 			$link = $this->getLinkRenderer()->makeKnownLink( $userTitle, $username );
 
-			$rows .= Html::rawElement( 'tr', [],
+			$rows .= Html::rawElement(
+				'tr',
+				[],
 				Html::rawElement( 'td', [], $link ) .
 				Html::element( 'td', [], (string)$count )
 			);
